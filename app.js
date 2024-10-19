@@ -11,6 +11,43 @@ app.use(cors())
 
 mongoose.connect("mongodb+srv://firdhouskh:kunjumol@cluster0.h3qcl.mongodb.net/musjidapp?retryWrites=true&w=majority&appName=Cluster0")
 
+
+//signin
+app.post("/signin",async(req,res)=>{
+
+    let input =req.body
+    let result =userModel.find({email:req.body.email}).then(
+        (items)=>{
+            if(items.length>0){
+                const passwordValidator=bcrypt.compareSync(req.body.password,items[0].password)
+                if(passwordValidator){
+                    jwt.sign({email:req.body.email},"musjid",{expiresIn:"1d"},
+                        (error,token)=>{
+                            if(error){
+                                res.json({"status":"error","errorMessage":error})
+                            }else{
+                                res.json({"status":"success","token":token,"userId":items[0]._id})
+                            }
+                        }
+                    )
+                }
+            else{
+                res.json({"status":"Incorrect Password"})
+            }
+        }else{
+            res.json({"status":"Invalid Email id"})
+        }
+
+        }
+    )
+
+
+
+})
+
+
+
+//signup
 app.post("/signup",async(req,res)=>{
     
     let input=req.body
